@@ -16,7 +16,7 @@ import torchvision.models as models
 import argparse
 # import yaml
 # Custom
-import models.resnet as resnet
+import models.resnet_o as resnet
 from models.lenet import LeNet5
 from models.build_ssl_model import build_model
 
