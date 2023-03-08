@@ -47,7 +47,7 @@ parser.add_argument("-s","--ssl", type=bool, default=True,
                     help="")
 parser.add_argument("-ss","--selection_subset", type=int, default=10000,
                     help="This is the random pre-selection to avoid redundancy.")
-parser.add_argument("-la","--learner_architecture", type=str, default="vgg16",
+parser.add_argument("-la","--learner_architecture", type=str, default="resnet18",
                     help="")
 parser.add_argument("-b","--batch", type=int, default=128,
                     help="Batch size used for training")
@@ -239,9 +239,17 @@ if __name__ == '__main__':
                 if args.method_type == 'mobyv2al':
                     model = build_model(NO_CLASSES, 'moby', args.learner_architecture, BATCH, interleaved).cuda()
                     if args.learner_architecture == "vgg16":
-                        classifier = resnet.VGGNet2C(512, NO_CLASSES).cuda()
+                        dim_latent = 512
+                        classifier = resnet.VGGNet2C(dim_latent, NO_CLASSES).cuda()
+                    elif args.learner_architecture == "lenet5":
+                        dim_latent = 400
+                        classifier = resnet.ResNetC(dim_latent, num_classes=NO_CLASSES).cuda()
+                    elif args.learner_architecture == "wideresnet28":
+                        dim_latent = 640
+                        classifier = resnet.ResNetC(dim_latent, num_classes=NO_CLASSES).cuda()
                     else:
-                        classifier = resnet.ResNetC(512, num_classes=NO_CLASSES).cuda()
+                        dim_latent = 512
+                        classifier = resnet.ResNetC(dim_latent, num_classes=NO_CLASSES).cuda()
                 else:
                     if args.learner_architecture == "vgg16":
                         model = resnet.dnn_16(NO_CLASSES).cuda()
@@ -306,7 +314,7 @@ if __name__ == '__main__':
                 else:
                     acc, arg = train_with_ssl2(models, method, criterion, optimizers, schedulers, dataloaders, 
                                     args.no_of_epochs, NO_CLASSES, args, labeled_set, 
-                                    subset, data_train, cycle, last_interleaved, ADDENDUM)
+                                    subset, data_train, cycle, last_interleaved, ADDENDUM, dim_latent)
 
             else:
                 acc = train(models, method, criterion, optimizers, schedulers, dataloaders, 
