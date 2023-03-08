@@ -1,6 +1,5 @@
-from tkinter import N
 from .moby import MoBY, DINOHead, MultiCropWrapper
-import models.resnet as resnet
+import models.resnet_o as resnet
 from .builder import MoCo
 from yacs.config import CfgNode as CN
 from .lenet import LeNet5
@@ -24,7 +23,7 @@ def build_model(no_classes, model_type, model_encoder, batch_size, no_of_labelle
         enc = resnet.ResNet18E
         clsf = resnet.ResNetC(512, num_classes=no_classes)
     if model_encoder == 'lenet5':
-        enc = LeNet5(no_classes,)
+        enc = LeNet5
         clsf = resnet.VGGNet2C(400, no_classes)
     if model_type == 'moby':
         encoder = enc()      
