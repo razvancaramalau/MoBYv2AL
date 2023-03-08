@@ -4,7 +4,7 @@ import random
 import torch
 from tqdm import tqdm
 import numpy as np
-import models.resnet as resnet
+import models.resnet_o as resnet
 from torch.utils.data import DataLoader
 from sampler import SubsetSequentialSampler
 from models.lenet import LeNet5
@@ -206,7 +206,7 @@ def test_without_ssl2(models, epoch, no_classes, dataloaders, args, cycle, mode=
     elif args.learner_architecture == "wideresnet28":
         models_b = resnet.Wide_ResNet28(no_classes).cuda()
     elif args.learner_architecture == "lenet5":
-        models_b = LeNet5(no_classes,)
+        models_b = LeNet5().cuda()
 
     models['classifier'].eval()
     if epoch > 1:
@@ -425,7 +425,7 @@ def train_epoch_ssl2(models, method, criterion, optimizers, dataloaders,
     return loss
 
 def train_with_ssl2(models, method, criterion, optimizers, schedulers, dataloaders, num_epochs, 
-                           no_classes, args, labeled_data, unlabeled_data, data_train, cycle, last_inter, ADDENDUM):
+                           no_classes, args, labeled_data, unlabeled_data, data_train, cycle, last_inter, ADDENDUM, dim_latent):
     print('>> Train a Model.')
     best_acc = 0.
     arg = 0
@@ -462,7 +462,7 @@ def train_with_ssl2(models, method, criterion, optimizers, schedulers, dataloade
     models['classifier'].eval()
     models['backbone'].eval()
     # # 
-    features = np.empty((args.batch,512))
+    features = np.empty((args.batch, dim_latent))
     # #     c_loss =  torch.tensor([]).cuda()
     k_var = 2
     c_loss_m = np.zeros((k_var, args.batch*len(dataloaders['unlabeled'])))
@@ -480,11 +480,11 @@ def train_with_ssl2(models, method, criterion, optimizers, schedulers, dataloade
     if args.learner_architecture == "vgg16":
         models_b = resnet.dnn_16enc(no_classes).cuda()
     elif args.learner_architecture == "resnet18":
-        models_b = resnet.ResNet18(no_classes).cuda()
+        models_b = resnet.ResNet18E(no_classes).cuda()
     elif args.learner_architecture == "wideresnet28":
         models_b = resnet.Wide_ResNet28(no_classes).cuda()
     elif args.learner_architecture == "lenet5":
-        models_b = LeNet5(no_classes,)
+        models_b = LeNet5().cuda()
     models_b.load_state_dict(state_dict, strict=False)
     models_b.eval()
     combined_dataset = DataLoader(data_train, batch_size=args.batch, 
